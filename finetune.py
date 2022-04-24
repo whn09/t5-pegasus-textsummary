@@ -2,10 +2,11 @@
 # 微调T5 PEGASUS做Seq2Seq任务
 # 介绍链接：https://kexue.fm/archives/8209
 
+from __future__ import print_function
+
 import os
 os.system('pip install -r requirements.txt')
 
-from __future__ import print_function
 import json
 import numpy as np
 import pandas as pd
