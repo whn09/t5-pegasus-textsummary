@@ -29,10 +29,12 @@ batch_size = 1
 epochs = 40
 
 # 模型路径
-config_path = './chinese_t5_pegasus_base/config.json'
-checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
-dict_path = './chinese_t5_pegasus_base/vocab.txt'
-
+# config_path = './chinese_t5_pegasus_base/config.json'
+# checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
+# dict_path = './chinese_t5_pegasus_base/vocab.txt'
+config_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/config.json'
+checkpoint_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/model.ckpt'
+dict_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/vocab.txt'
 
 def process_summary(summary):
     # test = summary.replace('\n\n','\n').split('\n')

@@ -12,9 +12,13 @@ from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from rouge import Rouge
 from boto3.session import Session
 
-config_path = './chinese_t5_pegasus_base/config.json'
-checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
-dict_path = './chinese_t5_pegasus_base/vocab.txt'
+# config_path = './chinese_t5_pegasus_base/config.json'
+# checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
+# dict_path = './chinese_t5_pegasus_base/vocab.txt'
+
+config_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/config.json'
+checkpoint_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/model.ckpt'
+dict_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/vocab.txt'
 
 
 def process_summary(summary):
@@ -61,7 +65,7 @@ def get_summary_pegusas():
     decoder = t5.decoder
     model = t5.model
 
-    model.load_weights('./best_model.weights')
+    model.load_weights('/home/ec2-user/SageMaker/bert_model/best_model.weights')
 
     class AutoTitle(AutoRegressiveDecoder):
         """seq2seq解码器
@@ -197,12 +201,12 @@ def evaluation(data, type):
 
 def main():
     data = load_data_customer('./customer.xlsx')
-    #res = evaluation(data, 'pegusas')
-    #print (res)
-    #res = evaluation(data, 'textrank')
-    #print (res)
-    res = evaluation(data, 'bertsum')
-    print(res)
+    res = evaluation(data, 'pegusas')
+    print (res)
+#     res = evaluation(data, 'textrank')
+#     print (res)
+#     res = evaluation(data, 'bertsum')
+#     print(res)
 
 
 if __name__ == '__main__':
