@@ -4,3 +4,4 @@ bert4keras==0.10.0
 jieba
 tqdm
 rouge
+nltk
