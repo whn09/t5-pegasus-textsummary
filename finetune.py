@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import os
 os.system('pip install -r requirements.txt')
+os.system('pip install -U pandas')
 
 import json
 import numpy as np
@@ -23,6 +24,7 @@ from rouge import Rouge  # pip install rouge
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 import jieba
 import re
+
 
 jieba.initialize()
 
