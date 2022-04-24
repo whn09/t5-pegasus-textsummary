@@ -65,7 +65,8 @@ def get_summary_pegusas():
     decoder = t5.decoder
     model = t5.model
 
-    model.load_weights('/home/ec2-user/SageMaker/bert_model/best_model.weights')
+    model.load_weights('./best_model.weights')
+#     model.load_weights('/home/ec2-user/SageMaker/bert_model/best_model.weights')
 
     class AutoTitle(AutoRegressiveDecoder):
         """seq2seq解码器

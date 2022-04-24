@@ -32,9 +32,12 @@ epochs = 40
 # config_path = './chinese_t5_pegasus_base/config.json'
 # checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
 # dict_path = './chinese_t5_pegasus_base/vocab.txt'
-config_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/config.json'
-checkpoint_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/model.ckpt'
-dict_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/vocab.txt'
+# config_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/config.json'
+# checkpoint_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/model.ckpt'
+# dict_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/vocab.txt'
+config_path = '/opt/ml/input/data/chinese_t5_pegasus_base/config.json'
+checkpoint_path = '/opt/ml/input/data/chinese_t5_pegasus_base/model.ckpt'
+dict_path = '/opt/ml/input/data/chinese_t5_pegasus_base/vocab.txt'
 
 def process_summary(summary):
     # test = summary.replace('\n\n','\n').split('\n')
@@ -80,9 +83,12 @@ def load_data(filename):
 
 
 # 加载数据集
-train_data = load_data_customer('./customer.xlsx','train')
-valid_data = load_data_customer('./customer.xlsx','valid')
-test_data = load_data_customer('./customer.xlsx','test')
+# train_data = load_data_customer('./customer.xlsx','train')
+# valid_data = load_data_customer('./customer.xlsx','valid')
+# test_data = load_data_customer('./customer.xlsx','test')
+train_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','train')
+valid_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','valid')
+test_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','test')
 
 # 加载数据集
 # train_data = load_data_customer('./customer.tsv')
@@ -185,7 +191,8 @@ class Evaluator(keras.callbacks.Callback):
         metrics = self.evaluate(valid_data)  # 评测模型
         if metrics['bleu'] > self.best_bleu:
             self.best_bleu = metrics['bleu']
-            model.save_weights('./best_model.weights')  # 保存模型
+#             model.save_weights('./best_model.weights')  # 保存模型
+            model.save_weights('/opt/ml/model/best_model.weights')  # 保存模型
         metrics['best_bleu'] = self.best_bleu
         print('valid_data:', metrics)
 
@@ -237,5 +244,6 @@ if __name__ == '__main__':
 
 else:
 
-    model.load_weights('./best_model.weights')
+#     model.load_weights('./best_model.weights')
+    model.load_weights('/opt/ml/model/best_model.weights')
 
