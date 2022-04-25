@@ -210,9 +210,9 @@ class Evaluator(keras.callbacks.Callback):
             title = ' '.join(title).lower()
             pred_title = ' '.join(autotitle.generate(content,
                                                      topk=topk)).lower()
-            print("content: ", content)
-            print("title: ", title)
-            print("pred_title: ", pred_title)
+#             print("content: ", content)
+#             print("title: ", title)
+#             print("pred_title: ", pred_title)
 
             if pred_title.strip():
                 scores = self.rouge.get_scores(hyps=pred_title, refs=title)
