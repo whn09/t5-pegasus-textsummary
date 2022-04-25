@@ -157,8 +157,8 @@ class Evaluator(keras.callbacks.Callback):
         if metrics['bleu'] > self.best_bleu:
             self.best_bleu = metrics['bleu']
 #             model.save_weights('./best_model.weights')  # 保存模型
-#             model.save_weights('/opt/ml/model/best_model.weights')  # 保存模型
-            model.save_weights(os.path.join(args.model_dir, 'best_model.weights'))  # 保存模型
+            model.save_weights('/opt/ml/model/best_model.weights')  # 保存模型
+#             model.save_weights(os.path.join(args.model_dir, 'best_model.weights'))  # 保存模型
         metrics['best_bleu'] = self.best_bleu
         print('valid_data:', metrics)
 
