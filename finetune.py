@@ -33,20 +33,20 @@ jieba.initialize()
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--batch-size", type=int, default=1)
+    parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--learning-rate", type=float, default=2e-4)
+    parser.add_argument("--learning_rate", type=float, default=2e-4)
     
-    parser.add_argument("--max-c-len", type=int, default=500)
-    parser.add_argument("--max-t-len", type=int, default=200)
+    parser.add_argument("--max_c_len", type=int, default=500)
+    parser.add_argument("--max_t_len", type=int, default=200)
 
-    parser.add_argument("--model-dir", type=str, default=os.environ["SM_MODEL_DIR"])
+    parser.add_argument("--model_dir", type=str, default=os.environ["SM_MODEL_DIR"])
     parser.add_argument("--training", type=str, default=os.environ["SM_CHANNEL_TRAINING"])
     parser.add_argument("--chinese_t5_pegasus_base", type=str, default=os.environ["SM_CHANNEL_CHINESE_T5_PEGASUS_BASE"])
 
-#     parser.add_argument("--num-gpus", type=int, default=1)
-#     parser.add_argument("--num-workers", type=int, default=8)
-#     parser.add_argument("--current-host", type=str, default=os.environ["SM_CURRENT_HOST"])
+#     parser.add_argument("--num_gpus", type=int, default=1)
+#     parser.add_argument("--num_workers", type=int, default=8)
+#     parser.add_argument("--current_host", type=str, default=os.environ["SM_CURRENT_HOST"])
 #     parser.add_argument("--hosts", type=list, default=json.loads(os.environ["SM_HOSTS"]))
 
     return parser.parse_args()
