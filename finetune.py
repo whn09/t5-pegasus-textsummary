@@ -8,6 +8,7 @@ import os
 os.system('pip install -r requirements.txt')
 os.system('pip install -U pandas')
 
+import argparse
 import json
 import numpy as np
 import pandas as pd
@@ -28,22 +29,28 @@ import re
 
 jieba.initialize()
 
-# 基本参数
-max_c_len = 500
-max_t_len = 200
-batch_size = 1
-epochs = 40
 
-# 模型路径
-# config_path = './chinese_t5_pegasus_base/config.json'
-# checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
-# dict_path = './chinese_t5_pegasus_base/vocab.txt'
-# config_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/config.json'
-# checkpoint_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/model.ckpt'
-# dict_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/vocab.txt'
-config_path = '/opt/ml/input/data/chinese_t5_pegasus_base/config.json'
-checkpoint_path = '/opt/ml/input/data/chinese_t5_pegasus_base/model.ckpt'
-dict_path = '/opt/ml/input/data/chinese_t5_pegasus_base/vocab.txt'
+def parse_args():
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("--batch-size", type=int, default=1)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--learning-rate", type=float, default=2e-4)
+    
+    parser.add_argument("--max-c-len", type=int, default=500)
+    parser.add_argument("--max-t-len", type=int, default=200)
+
+    parser.add_argument("--model-dir", type=str, default=os.environ["SM_MODEL_DIR"])
+    parser.add_argument("--training", type=str, default=os.environ["SM_CHANNEL_TRAINING"])
+    parser.add_argument("--chinese_t5_pegasus_base", type=str, default=os.environ["SM_CHANNEL_CHINESE_T5_PEGASUS_BASE"])
+
+#     parser.add_argument("--num-gpus", type=int, default=1)
+#     parser.add_argument("--num-workers", type=int, default=8)
+#     parser.add_argument("--current-host", type=str, default=os.environ["SM_CURRENT_HOST"])
+#     parser.add_argument("--hosts", type=list, default=json.loads(os.environ["SM_HOSTS"]))
+
+    return parser.parse_args()
+
 
 def process_summary(summary):
     # test = summary.replace('\n\n','\n').split('\n')
@@ -88,28 +95,6 @@ def load_data(filename):
     return D
 
 
-# 加载数据集
-# train_data = load_data_customer('./customer.xlsx','train')
-# valid_data = load_data_customer('./customer.xlsx','valid')
-# test_data = load_data_customer('./customer.xlsx','test')
-train_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','train')
-valid_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','valid')
-test_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','test')
-
-# 加载数据集
-# train_data = load_data_customer('./customer.tsv')
-# valid_data = load_data_customer('./train.tsv')
-# test_data = load_data_customer('./train.tsv')
-
-
-# 构建分词器
-tokenizer = Tokenizer(
-    dict_path,
-    do_lower_case=True,
-    pre_tokenize=lambda s: jieba.cut(s, HMM=False)
-)
-
-
 class data_generator(DataGenerator):
     """数据生成器
     """
@@ -142,25 +127,6 @@ class CrossEntropy(Loss):
         return loss
 
 
-t5 = build_transformer_model(
-    config_path=config_path,
-    checkpoint_path=checkpoint_path,
-    model='t5.1.1',
-    return_keras_model=False,
-    name='T5',
-)
-
-encoder = t5.encoder
-decoder = t5.decoder
-model = t5.model
-model.summary()
-
-output = CrossEntropy(1)([model.inputs[1], model.outputs[0]])
-
-model = Model(model.inputs, output)
-model.compile(optimizer=Adam(2e-4))
-
-
 class AutoTitle(AutoRegressiveDecoder):
     """seq2seq解码器
     """
@@ -177,13 +143,6 @@ class AutoTitle(AutoRegressiveDecoder):
         return tokenizer.decode(output_ids)
 
 
-autotitle = AutoTitle(
-    start_id=tokenizer._token_start_id,
-    end_id=tokenizer._token_end_id,
-    maxlen=max_t_len
-)
-
-
 class Evaluator(keras.callbacks.Callback):
     """评估与保存
     """
@@ -198,7 +157,8 @@ class Evaluator(keras.callbacks.Callback):
         if metrics['bleu'] > self.best_bleu:
             self.best_bleu = metrics['bleu']
 #             model.save_weights('./best_model.weights')  # 保存模型
-            model.save_weights('/opt/ml/model/best_model.weights')  # 保存模型
+#             model.save_weights('/opt/ml/model/best_model.weights')  # 保存模型
+            model.save_weights(os.path.join(args.model_dir, 'best_model.weights'))  # 保存模型
         metrics['best_bleu'] = self.best_bleu
         print('valid_data:', metrics)
 
@@ -237,7 +197,78 @@ class Evaluator(keras.callbacks.Callback):
 
 
 if __name__ == '__main__':
+    
+    args = parse_args()
 
+    # 基本参数
+    max_c_len = args.max_c_len  # 500
+    max_t_len = args.max_t_len  # 200
+    batch_size = args.batch_size  # 1
+    epochs = args.epochs  # 40
+    learning_rate = args.learning_rate  # 2e-4
+
+    # 模型路径
+    # config_path = './chinese_t5_pegasus_base/config.json'
+    # checkpoint_path = './chinese_t5_pegasus_base/model.ckpt'
+    # dict_path = './chinese_t5_pegasus_base/vocab.txt'
+    # config_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/config.json'
+    # checkpoint_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/model.ckpt'
+    # dict_path = '/home/ec2-user/SageMaker/bert_model/chinese_t5_pegasus_base/vocab.txt'
+    # config_path = '/opt/ml/input/data/chinese_t5_pegasus_base/config.json'
+    # checkpoint_path = '/opt/ml/input/data/chinese_t5_pegasus_base/model.ckpt'
+    # dict_path = '/opt/ml/input/data/chinese_t5_pegasus_base/vocab.txt'
+    config_path = os.path.join(args.chinese_t5_pegasus_base, 'config.json')
+    checkpoint_path = os.path.join(args.chinese_t5_pegasus_base, 'model.ckpt')
+    dict_path = os.path.join(args.chinese_t5_pegasus_base, 'vocab.txt')
+    
+    # 加载数据集
+    # train_data = load_data_customer('./customer.xlsx','train')
+    # valid_data = load_data_customer('./customer.xlsx','valid')
+    # test_data = load_data_customer('./customer.xlsx','test')
+    # train_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','train')
+    # valid_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','valid')
+    # test_data = load_data_customer('/opt/ml/input/data/training/customer.xlsx','test')
+    train_data = load_data_customer(os.path.join(args.training, 'customer.xlsx'),'train')
+    valid_data = load_data_customer(os.path.join(args.training, 'customer.xlsx'),'valid')
+    test_data = load_data_customer(os.path.join(args.training, 'customer.xlsx'),'test')
+
+    # 加载数据集
+    # train_data = load_data_customer('./customer.tsv')
+    # valid_data = load_data_customer('./train.tsv')
+    # test_data = load_data_customer('./train.tsv')
+
+    # 构建分词器
+    tokenizer = Tokenizer(
+        dict_path,
+        do_lower_case=True,
+        pre_tokenize=lambda s: jieba.cut(s, HMM=False)
+    )
+
+    t5 = build_transformer_model(
+        config_path=config_path,
+        checkpoint_path=checkpoint_path,
+        model='t5.1.1',
+        return_keras_model=False,
+        name='T5',
+    )
+
+    encoder = t5.encoder
+    decoder = t5.decoder
+    model = t5.model
+    model.summary()
+
+    output = CrossEntropy(1)([model.inputs[1], model.outputs[0]])
+
+    model = Model(model.inputs, output)
+    # model.compile(optimizer=Adam(2e-4))
+    model.compile(optimizer=Adam(learning_rate))
+    
+    autotitle = AutoTitle(
+        start_id=tokenizer._token_start_id,
+        end_id=tokenizer._token_end_id,
+        maxlen=max_t_len
+    )
+    
     evaluator = Evaluator()
     train_generator = data_generator(train_data, batch_size)
 
@@ -248,8 +279,8 @@ if __name__ == '__main__':
         callbacks=[evaluator]
     )
 
-else:
+# else:
 
-#     model.load_weights('./best_model.weights')
-    model.load_weights('/opt/ml/model/best_model.weights')
+# #     model.load_weights('./best_model.weights')
+#     model.load_weights('/opt/ml/model/best_model.weights')
 
