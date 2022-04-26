@@ -134,7 +134,7 @@ def evaluation(data, type):
     rouge_l_f_score_ls = []
     bleu_ls = []
 
-    for (title, content) in data:
+    for (title, content) in tqdm.tqdm(data):
         total += 1
         title = ' '.join(title).lower()
         if type == 'pegusas':
@@ -146,9 +146,9 @@ def evaluation(data, type):
         elif type=='bertsum':
             pred_title = bertsum_res[total].replace('<q>','').replace('\n','')
 
-        print("content: ", content)
-        print("title: ", title)
-        print("pred_title: ", pred_title)
+#         print("content: ", content)
+#         print("title: ", title)
+#         print("pred_title: ", pred_title)
 
         if pred_title.strip():
             scores = Rouge().get_scores(hyps=pred_title, refs=title)
