@@ -35,7 +35,11 @@ def load_data_customer(filename):
     df = pd.read_excel(filename, engine='openpyxl')
     D = []
 
-    for i in range(len(df)):
+    start = int(len(df) * 0.8)
+    end = len(df)
+    
+#     for i in range(len(df)):
+    for i in range(start,end):
         main_file = df['正文'][i].replace('\n', '').replace(' ', '')
         summary = df['摘要'][i]
         summary_text = process_summary(summary).replace('\n', '').replace(' ', '')
@@ -43,7 +47,7 @@ def load_data_customer(filename):
     return D
 
 
-def get_summary_pegusas():
+def get_summary_pegasus():
     # bert4keras版本
     max_c_len = 500
     max_t_len = 200
@@ -119,8 +123,8 @@ def evaluation(data, type):
     total = 0
     rouge_1, rouge_2, rouge_l, bleu = 0, 0, 0, 0
 
-    if type == 'pegusas':
-        autotitle = get_summary_pegusas()
+    if type == 'pegasus':
+        autotitle = get_summary_pegasus()
 
     if type == 'bertsum':
         with open('/home/ec2-user/SageMaker/bertsum-chinese-LAI/results/MS_step30000.candidate', 'r') as save_pred:
@@ -137,7 +141,7 @@ def evaluation(data, type):
     for (title, content) in tqdm.tqdm(data):
         total += 1
         title = ' '.join(title).lower()
-        if type == 'pegusas':
+        if type == 'pegasus':
             pred_title = ' '.join(autotitle.generate(content,
                                                      topk=1)).lower()
         elif type =='textrank':
@@ -202,7 +206,7 @@ def evaluation(data, type):
 
 def main():
     data = load_data_customer('./customer.xlsx')
-    res = evaluation(data, 'pegusas')
+    res = evaluation(data, 'pegasus')
     print (res)
 #     res = evaluation(data, 'textrank')
 #     print (res)
